@@ -30,6 +30,7 @@ const int kAudioStreamFile = 0x0005;// AUDIO STREAM files
 const int kBitmapFile = 0x0006;		// BITMAP files
 const int kInstallFile = 0x0007;	// Install files (main directory)
 const int kBaseFile = 0x0008;
+const int kScriptFile = 0x0009;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGameBuilderDlg dialog
@@ -181,6 +182,8 @@ void CGameBuilderDlg::SetupDirectory()
 	_rmdir(sPath);
 	CreateDirectory(sPath,NULL);
 	sMain = sPath+"\\install";
+	CreateDirectory(sMain,NULL);
+	sMain = sPath+"\\scripts";
 	CreateDirectory(sMain,NULL);
 	sMain = sPath+"\\media";
 	CreateDirectory(sMain,NULL);
@@ -450,6 +453,10 @@ void CGameBuilderDlg::CreateDir(int nFileType, char *szFilename)
 			strcat(szTemp, "install\\");
 			strcat(szTemp, destDir);
 			break;
+		case kScriptFile:
+			strcat(szTemp, "scripts\\");
+			strcat(szTemp, destDir);
+			break;
 		}
 		CreateDirectory(szTemp,NULL);
 		srcDir = srcDir.Mid(length+1);
@@ -505,13 +512,14 @@ bool CGameBuilderDlg::OpenRFFile(geVFile **theFp, int nFileType,
 		strcat(szTemp, "install\\");
 		strcat(szTemp, szFilename);
 		break;
+	case kScriptFile:
+		strcat(szTemp, "scripts\\");
+		strcat(szTemp, szFilename);
+		break;
 	case kBaseFile:
 		strcat(szTemp, szFilename);
 		break;
 	}
-
-	//MessageBox(szTemp,
-	//		"RealityFactory INI Editor", MB_ICONSTOP | MB_OK);
 
 	//	Ok, open the file up.
 	
@@ -718,9 +726,12 @@ void CGameBuilderDlg::CopyMain()
 	CopyToDos(kInstallFile, "effect.ini");
 	CopyToDos(kInstallFile, "explosion.ini");
 	CopyToDos(kInstallFile, "inventory.ini");
-	CopyToDos(kInstallFile, "npc.ini");
 	CopyToDos(kInstallFile, "playersetup.ini");
 	CopyToDos(kInstallFile, "weapon.ini");
+	CopyToDos(kInstallFile, "armour.ini");
+	CopyToDos(kInstallFile, "control.ini");
+	CopyToDos(kInstallFile, "conversation.txt");
+	CopyToDos(kInstallFile, "material.ini");
 	if(m_menuini=="")
 		m_menuini = "menu.ini";
 	strcpy(filename, m_menuini);
@@ -797,7 +808,6 @@ void CGameBuilderDlg::CopyBuiltIn()
 	CopyToDos(kBitmapFile, "a_bubbl.bmp");
 	CopyToDos(kBitmapFile, "rain.bmp");
 	CopyToDos(kBitmapFile, "a_rain.bmp");
-	CopyToDos(kBitmapFile, "menu\\loading.bmp");
 	CopyToDos(kAudioFile, "loopbzzt.wav");
 	CopyToDos(kAudioFile, "onebzzt.wav");
 }
@@ -929,6 +939,13 @@ void CGameBuilderDlg::CopyMenu()
 				CopyToDos(kMIDIFile, musicname);
 			else
 				CopyToDos(kAudioStreamFile, musicname);
+		}
+		else if(!stricmp(szAtom,"loadscreen"))
+		{
+			NextToken();
+			strcpy(menuline,"menu\\");
+			strcat(menuline,NextToken());
+			CopyToDos(kBitmapFile, menuline);
 		}
 	}
 	geVFile_Close(SecondFS);
